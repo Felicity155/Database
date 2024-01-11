@@ -1,0 +1,61 @@
+简单查询：
+（1）检索学生表中年龄小于等于20岁的学生信息，按年龄升序排序
+SELECT *
+FROM student
+WHERE age <= 20
+ORDER BY age ASC
+
+（2）检索选了001老师的所有课程的成绩信息
+SELECT *
+FROM sc
+WHERE id IN (SELECT id FROM course WHERE teacher = '001')
+
+（3）检索选了001老师的课的所有学生的信息
+SELECT *
+FROM student
+WHERE id IN (SELECT sid FROM sc WHERE cid IN (SELECT id FROM course WHERE teacher = '001'))
+
+（4）检索选了“C001”课程的所有学生的信息和成绩信息，按成绩降序排序
+SELECT *
+FROM student, sc
+WHERE student.id = sc.sid AND sc.cid = 'C001' 
+ORDER BY score DESC
+
+多表连接查询：
+（1）检索所有学生选课的信息和课程信息
+SELECT *
+FROM sc, course
+WHERE sc.cid = course.id
+
+（2）检索所有选了“数学C022”课程的学生成绩和课程信息
+SELECT *
+FROM sc, course
+WHERE sc.cid = course.id AND course.name = '数学C022'
+
+分组聚集查询：
+（1）检索每门课程的选课人数和平均成绩
+SELECT course.id, course.name, COUNT(sc.sid) AS Num_of_Students, AVG(sc.score) AS Avg_Score
+FROM course, sc
+WHERE course.id = sc.cid
+GROUP BY course.id, course.name;
+
+（2）检索每个年龄段学生的人数和平均年龄
+SELECT CASE 
+         WHEN age < 20 THEN '15-19' 
+         WHEN age >= 20 AND age < 30 THEN '20-29' 
+         ELSE '30+' 
+       END AS Age_Group, COUNT(*) AS Num_of_Students, AVG(age) AS Avg_Age
+FROM student
+GROUP BY Age_Group;
+
+分组过滤查询：
+（1）检索选了至少32门课程的学生的信息
+SELECT sid
+FROM sc
+GROUP BY sid
+HAVING COUNT(*) >= 32;
+
+（2）检索选了“001”课程的学生中，成绩在80分以上的学生的信息
+SELECT *
+FROM student, sc
+WHERE student.id = sc.sid AND sc.cid = 'C001' AND sc.score >= 80;
